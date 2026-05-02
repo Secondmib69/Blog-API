@@ -28,4 +28,34 @@ class Post(models.Model):
     slug = AutoSlugField(populate_from='title', unique=True)
     image = models.ImageField(upload_to='posts/%Y/%m/%d/', blank=True)
 
+    def __str__(self):
+        return self.title
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['title']),
+            models.Index(fields=['author'])
+        ]
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    body = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=False)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, related_name='replies', blank=True, null=True)
+
+
+    def __str__(self):
+        return f'by {self.user.username} on post: {self.post.title}'
+    
+    class Meta:
+        indexes = [
+        models.Index(fields=['post', 'is_active']),
+        models.Index(fields=['post', 'created']),
+        
+        models.Index(fields=['user', 'is_active']),
+        models.Index(fields=['user', 'created']),
+        ]
 
