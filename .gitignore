@@ -1,0 +1,71 @@
+# ======================
+# Django & Python ignores
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.py~
+*.mo
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+local_settings.py
+.env
+.env.*
+
+# ======================
+# IDE and Editor files
+# ======================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ======================
+# Virtual environments
+# ======================
+venv/
+ENV/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# ======================
+# Pytest / coverage
+# ======================
+.coverage
+.tox/
+nosetests.xml
+htmlcov/
+coverage.xml
+.pytest_cache/
+.cache/
+
+# ======================
+# Jupyter Notebook
+# ======================
+.ipynb_checkpoints
+
+# ======================
+# OS-related
+# ======================
+.DS_Store
+Thumbs.db
+
+# ======================
+# Migrations (optional)
+# ======================
+# Uncomment the next line if you don't want to push initial migrations
+# */migrations/
+# */migrations/*.py
+# !*/migrations/__init__.py
