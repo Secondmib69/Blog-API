@@ -44,6 +44,19 @@ INSTALLED_APPS = [
     'blog.apps.BlogConfig',
     
     'autoslug',
+
+    'rest_framework',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+
+    'allauth',
+    'allauth.account',
+
+    'dj_rest_auth.registration',
+    'dj_rest_auth',
+
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -54,6 +67,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -134,3 +148,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+
+SITE_ID = 1
