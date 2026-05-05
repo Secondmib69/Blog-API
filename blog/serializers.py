@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from .models import Post, Comment
 from .views import *
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 
-
-
+User = get_user_model()
 class PostSerializer(serializers.ModelSerializer):
 
 
@@ -70,4 +71,25 @@ class CommentApproveSerializer(serializers.ModelSerializer):
                 if name != "is_active":
                     field.read_only = True
         return fields
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    password = serializers.CharField(validators=[validate_password], required=True, write_only=True)
+    password2 = serializers.CharField(required=True, write_only=True, label='Confirm Password')
+    
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'password2', 'is_active', 'is_staff']
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError('Passwords don\'t match')
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop('password2')
+        password = validated_data.pop('password')
+        user = User.objects.create_user(**validated_data, password=password)
+        return user
 

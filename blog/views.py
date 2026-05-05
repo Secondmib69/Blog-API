@@ -1,13 +1,14 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Post, Comment
 from rest_framework import generics
-from .serializers import PostSerializer, PostCommentSerializer, CommentApproveSerializer
+from .serializers import PostSerializer, PostCommentSerializer, CommentApproveSerializer, User, UserSerializer
 from django.db.models import Q
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .permissions import IsPostAuthorOrStaffDeleteOrReadOnly, IsStaffOrCommentUserDelete
 from dj_rest_auth.jwt_auth import JWTCookieAuthentication
 from rest_framework.filters import OrderingFilter
+from rest_framework import viewsets
 # Create your views here.
 
 
@@ -89,4 +90,10 @@ class PostCommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.user.is_staff and self.request.method in ('PUT', 'PATCH'):
             return CommentApproveSerializer
         return PostCommentSerializer
+    
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
 
