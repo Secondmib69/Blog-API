@@ -75,21 +75,21 @@ class CommentApproveSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
-    password = serializers.CharField(validators=[validate_password], required=True, write_only=True)
-    password2 = serializers.CharField(required=True, write_only=True, label='Confirm Password')
-    
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password', 'password2', 'is_active', 'is_staff']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'job_title', 'bio', 'phone', 'is_active', 'is_staff', 'is_superuser']
 
-    def validate(self, attrs):
-        if attrs['password'] != attrs['password2']:
-            raise serializers.ValidationError('Passwords don\'t match')
-        return attrs
 
-    def create(self, validated_data):
-        validated_data.pop('password2')
-        password = validated_data.pop('password')
-        user = User.objects.create_user(**validated_data, password=password)
-        return user
+    def get_fields(self):
+        fields = super().get_fields()
+        request = self.context.get('request')
 
+        if request and not request.user.is_staff:
+            allowed_fields = ['username', 'first_name', 'last_name', 'job_title', 'bio']
+            fields =  {k: v for k, v in fields.items() if k in allowed_fields}
+        
+        for name, field in fields.items():
+            if name not in ('is_active', 'is_staff'):
+                field.read_only = True
+
+        return fields

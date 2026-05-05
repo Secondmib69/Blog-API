@@ -1,11 +1,11 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Post, Comment
-from rest_framework import generics
+from rest_framework import generics, exceptions, status
 from .serializers import PostSerializer, PostCommentSerializer, CommentApproveSerializer, User, UserSerializer
 from django.db.models import Q
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .permissions import IsPostAuthorOrStaffDeleteOrReadOnly, IsStaffOrCommentUserDelete
+from .permissions import IsPostAuthorOrStaffDeleteOrReadOnly, IsStaffOrCommentUserDelete, UserRolePermission
 from dj_rest_auth.jwt_auth import JWTCookieAuthentication
 from rest_framework.filters import OrderingFilter
 from rest_framework import viewsets
@@ -94,6 +94,15 @@ class PostCommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    # serializer_class = UserSerializer
+    http_method_names = ['get', 'put', 'patch', 'delete']
+    permission_classes = [UserRolePermission]
+
+    def get_serializer_class(self):
+        # if self.action in ['create', 'retrieve', 'list']:
+        return UserSerializer
+    
+
+
 
 
