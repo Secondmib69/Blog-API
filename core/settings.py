@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 import os
 from dotenv import load_dotenv
@@ -160,6 +161,24 @@ REST_FRAMEWORK = {
 
 }
 
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'access',
+    'JWT_AUTH_REFRESH_COOKIE': 'refresh', # Cookie name for token.
+    'JWT_AUTH_SECURE': False, # set true in production
+    # ... more settings
+}
+
+SITE_ID = 1
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=10),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True, 
+}
+
 SPECTACULAR_SETTINGS ={
     'TITLE':'Blog app',
     'DESCRIPTION':'Blog App APIs',
@@ -175,8 +194,6 @@ STORAGES = {
     },
 }
 
-
-# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_S3_ENDPOINT_URL = 'https://s3.ir-thr-at1.arvanstorage.ir'
 AWS_ACCESS_KEY_ID = os.getenv('ARVAN_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('ARVAN_SECRET_ACCESS_KEY')

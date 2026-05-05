@@ -6,6 +6,8 @@ from django.db.models import Q
 from rest_framework.exceptions import NotAuthenticated
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .permissions import IsPostAuthorOrStaffDeleteOrReadOnly, IsStaffOrCommentUserDelete
+from dj_rest_auth.jwt_auth import JWTCookieAuthentication
+from rest_framework.filters import OrderingFilter
 # Create your views here.
 
 
@@ -13,6 +15,11 @@ from .permissions import IsPostAuthorOrStaffDeleteOrReadOnly, IsStaffOrCommentUs
 class PostListAPIView(generics.ListCreateAPIView):
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    authentication_classes = [JWTCookieAuthentication]
+    filter_backends  = [OrderingFilter]
+    ordering_fields = ['created', 'updated']
+    # ordering = ['-created']
+
 
     def get_queryset(self):
         qs = Post.objects.all()
@@ -30,6 +37,7 @@ class PostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PostSerializer
     lookup_field= 'slug'
     permission_classes = [IsPostAuthorOrStaffDeleteOrReadOnly]
+    authentication_classes = [JWTCookieAuthentication]
 
     def get_queryset(self):
         qs = Post.objects.all()
@@ -43,6 +51,8 @@ class PostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 class PostCommentListAPIView(generics.ListCreateAPIView):
     serializer_class = PostCommentSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    authentication_classes = [JWTCookieAuthentication]
+
 
     def get_queryset(self):
         post = get_object_or_404(Post, slug=self.kwargs.get('slug'))
@@ -65,6 +75,7 @@ class PostCommentListAPIView(generics.ListCreateAPIView):
 class PostCommentDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     # serializer_class = PostCommentSerializer
     permission_classes = [IsStaffOrCommentUserDelete]
+    authentication_classes = [JWTCookieAuthentication]
     lookup_url_kwarg = 'id'
 
     def get_queryset(self):
