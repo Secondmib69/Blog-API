@@ -112,3 +112,25 @@ class UserSerializer(serializers.ModelSerializer):
             rep =  {k: v for k, v in rep.items() if k in allowed_fields}
 
         return rep
+    
+
+class UserCreateSerializer(serializers.ModelSerializer):
+
+    password = serializers.CharField(validators=[validate_password], write_only=True, required=True)
+    password2 = serializers.CharField(write_only=True, required=True, label='Confirm Password')
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'password', 'password2', 'phone', 'is_active', 'is_staff', 'is_superuser']
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError('passwords dont match')
+        return attrs
+
+
+    def create(self, validated_data):
+        validated_data.pop('password2')
+        password = validated_data.pop('password')
+        user = User.objects.create_user(**validated_data, password=password)
+        return user

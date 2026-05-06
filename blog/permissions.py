@@ -22,10 +22,16 @@ class IsStaffOrCommentUserDelete(BasePermission):
     
 
 class UserRolePermission(BasePermission):
+
+    def has_permission(self, request, view):
+        action = getattr(view, 'action', None)
+        if action == 'create':
+            return request.user.is_superuser
+        return True
+    
     def has_object_permission(self, request, view, obj):
         user = request.user
         method = request.method
-
 
         return bool(
             (user.is_superuser and obj.is_superuser and method in SAFE_METHODS) or
@@ -35,7 +41,3 @@ class UserRolePermission(BasePermission):
             (method in SAFE_METHODS or user == obj)
         )
     
-    # def has_permission(self, request, view):
-    #     if view.action == 'create':
-    #         return request.user.is_superuser
-    #     return True
