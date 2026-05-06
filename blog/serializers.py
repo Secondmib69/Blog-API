@@ -7,6 +7,12 @@ from django.contrib.auth.password_validation import validate_password
 User = get_user_model()
 class PostSerializer(serializers.ModelSerializer):
 
+    comments = serializers.HyperlinkedIdentityField(view_name='blog:comment-list', lookup_field='slug')
+
+    class Meta:
+        model = Post
+        fields = ['id', 'title',  'content', 'slug', 'created', 'updated', 'author', 'image', 'comments', 'status']
+        read_only_fields = ['author']
 
     def to_representation(self, instance): # status should be added in fields then pop under terms
         representation = super().to_representation(instance)
@@ -15,15 +21,6 @@ class PostSerializer(serializers.ModelSerializer):
         if not ((request and request.user.is_staff) or (request and request.user == instance.author)):
             representation.pop('status', None)
         return representation
-
-
-    comments = serializers.HyperlinkedIdentityField(view_name='blog:comment-list', lookup_field='slug')
-
-    class Meta:
-        model = Post
-        fields = ['id', 'title',  'content', 'slug', 'created', 'updated', 'author', 'image', 'comments', 'status']
-        read_only_fields = ['author']
-
 
 class PostCommentSerializer(serializers.ModelSerializer):
     
@@ -83,13 +80,35 @@ class UserSerializer(serializers.ModelSerializer):
     def get_fields(self):
         fields = super().get_fields()
         request = self.context.get('request')
+        view = self.context.get('view')
+        user = request.user
+        read_only = []
+
+        if request and user == self.instance:
+            if user.is_superuser:
+                pass
+            else:
+                read_only += ['is_active', 'is_staff', 'is_superuser']
+        elif request and user.is_superuser:
+            read_only += ['id', 'username', 'first_name', 'last_name', 'email', 'job_title', 'bio', 'phone']
+        elif request and user.is_staff:
+            read_only += ['id', 'username', 'first_name', 'last_name', 'email', 'job_title', 'bio', 'phone', 'is_staff', 'is_superuser']
+
+
+        for n, f in fields.items():
+            if n in read_only:
+                f.read_only = True
+   
+        return fields
+    
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        request = self.context.get('request')
 
         if request and not request.user.is_staff:
             allowed_fields = ['username', 'first_name', 'last_name', 'job_title', 'bio']
-            fields =  {k: v for k, v in fields.items() if k in allowed_fields}
-        
-        for name, field in fields.items():
-            if name not in ('is_active', 'is_staff'):
-                field.read_only = True
+            if request.user == instance:
+                allowed_fields += ['id', 'email', 'phone']
+            rep =  {k: v for k, v in rep.items() if k in allowed_fields}
 
-        return fields
+        return rep
