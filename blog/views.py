@@ -7,19 +7,34 @@ from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .permissions import IsPostAuthorOrStaffDeleteOrReadOnly, IsStaffOrCommentUserDelete, UserRolePermission
 from dj_rest_auth.jwt_auth import JWTCookieAuthentication
-from rest_framework.filters import OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from rest_framework import viewsets
 # Create your views here.
 
 
+class RoleFilter(DjangoFilterBackend):
+    def get_filterset_class(self, view, queryset = None):
+        if view.request.user.is_staff :
+            return view.StaffFilterSet
+
+        
 
 class PostListAPIView(generics.ListCreateAPIView):
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     authentication_classes = [JWTCookieAuthentication]
-    filter_backends  = [OrderingFilter]
+    filter_backends  = [SearchFilter, RoleFilter, OrderingFilter]
+    search_fields = ['title', 'content', 'author__username']
     ordering_fields = ['created', 'updated']
-    # ordering = ['-created']
+    ordering = ['-created']
+
+
+    class StaffFilterSet(FilterSet):
+        class Meta:
+            model = Post
+            fields = ['status']
+
 
 
     def get_queryset(self):
@@ -32,6 +47,9 @@ class PostListAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         return serializer.save(author=self.request.user)
+    
+
+    
 
 
 class PostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -53,6 +71,16 @@ class PostCommentListAPIView(generics.ListCreateAPIView):
     serializer_class = PostCommentSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     authentication_classes = [JWTCookieAuthentication]
+    filter_backends  = [SearchFilter, RoleFilter, OrderingFilter]
+    search_fields = ['user__username']
+    ordering_fields = ['created']
+    ordering = ['-created']
+
+
+    class StaffFilterSet(FilterSet):
+        class Meta:
+            model = Comment
+            fields = ['is_active']
 
 
     def get_queryset(self):
