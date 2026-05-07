@@ -8,16 +8,11 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .permissions import IsPostAuthorOrStaffDeleteOrReadOnly, IsStaffOrCommentUserDelete, UserRolePermission
 from dj_rest_auth.jwt_auth import JWTCookieAuthentication
 from rest_framework.filters import OrderingFilter, SearchFilter
-from django_filters.rest_framework import DjangoFilterBackend, FilterSet
+from django_filters.rest_framework import FilterSet, DjangoFilterBackend
+from .filters import RoleFilter, RoleSearchFilter
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 from rest_framework import viewsets
 # Create your views here.
-
-
-class RoleFilter(DjangoFilterBackend):
-    def get_filterset_class(self, view, queryset = None):
-        if view.request.user.is_staff :
-            return view.StaffFilterSet
-
         
 
 class PostListAPIView(generics.ListCreateAPIView):
@@ -28,13 +23,13 @@ class PostListAPIView(generics.ListCreateAPIView):
     search_fields = ['title', 'content', 'author__username']
     ordering_fields = ['created', 'updated']
     ordering = ['-created']
+    pagination_class = PageNumberPagination
 
 
     class StaffFilterSet(FilterSet):
         class Meta:
             model = Post
             fields = ['status']
-
 
 
     def get_queryset(self):
@@ -50,7 +45,6 @@ class PostListAPIView(generics.ListCreateAPIView):
     
 
     
-
 
 class PostDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = PostSerializer
@@ -75,6 +69,7 @@ class PostCommentListAPIView(generics.ListCreateAPIView):
     search_fields = ['user__username']
     ordering_fields = ['created']
     ordering = ['-created']
+    pagination_class = LimitOffsetPagination
 
 
     class StaffFilterSet(FilterSet):
@@ -124,10 +119,19 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     http_method_names = ['get', 'post', 'put', 'patch', 'delete']
     permission_classes = [UserRolePermission]
-
+    pagination_class = PageNumberPagination
+    filter_backends = [RoleSearchFilter, RoleFilter, OrderingFilter]
+    search_fields = ['username']
+    ordering_fields = ['date_joined']
 
     def get_serializer_class(self):
         if self.action == 'create':
             return UserCreateSerializer
         return UserSerializer
+    
+    
+    class StaffFilterSet(FilterSet):
+        class Meta:
+            model = User
+            fields = ['is_active', 'is_staff', 'is_superuser']
             

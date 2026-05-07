@@ -36,6 +36,7 @@ class PostCommentSerializer(serializers.ModelSerializer):
             'id': obj.user.id,
         }
     
+
     
     def get_fields(self):
         fields = super().get_fields()
