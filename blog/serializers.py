@@ -1,3 +1,4 @@
+from rest_framework.reverse import reverse
 from rest_framework import serializers
 from .models import Post, Comment
 from .views import *
@@ -7,11 +8,29 @@ from django.contrib.auth.password_validation import validate_password
 User = get_user_model()
 class PostSerializer(serializers.ModelSerializer):
 
+
+    def get_likes(self, obj):
+        request = self.context.get('request')
+        url = reverse('blog:user-list', request=request)
+
+        return f'{url}?slug={obj.slug}'
+    
+    def get_author(self, obj):
+        request = self.context.get('request')
+        url = reverse('blog:user-detail', request=request, kwargs={'pk': obj.author.id})
+        return {
+            'id': obj.author.id,
+            'username': obj.author.username,
+            'profile': url
+        }
+    author = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField()
+    likes_count = serializers.IntegerField(read_only=True)
     comments = serializers.HyperlinkedIdentityField(view_name='blog:comment-list', lookup_field='slug')
 
     class Meta:
         model = Post
-        fields = ['id', 'title',  'content', 'slug', 'created', 'updated', 'author', 'image', 'comments', 'status']
+        fields = ['id', 'title',  'content', 'slug', 'created', 'updated', 'author', 'image', 'comments', 'likes_count', 'likes', 'status']
         read_only_fields = ['author']
 
     def to_representation(self, instance): # status should be added in fields then pop under terms
@@ -20,20 +39,23 @@ class PostSerializer(serializers.ModelSerializer):
         representation['status'] = Post.PostStatus(instance.status).label 
         if not ((request and request.user.is_staff) or (request and request.user == instance.author)):
             representation.pop('status', None)
+            representation.pop('likes', None)
         return representation
 
 class PostCommentSerializer(serializers.ModelSerializer):
     
-    user = serializers.SerializerMethodField('comment_user_info')
+    user = serializers.SerializerMethodField()
     class Meta:
         model = Comment
         fields = ['id', 'user', 'body', 'created', 'post', 'parent', 'is_active']
         read_only_fields = ['user', 'parent', 'post']
 
-    def comment_user_info(self, obj):
+    def get_user(self, obj):
+        request = self.context.get('request')
+        url = reverse('blog:user-detail', request=request, kwargs={'pk': obj.user.id})
         return {
             'username': obj.user.username,
-            'id': obj.user.id,
+            'profile': url
         }
     
 
@@ -73,9 +95,17 @@ class CommentApproveSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
 
+    posts = serializers.SerializerMethodField()
+
+    def get_posts(self, obj):
+        request = self.context.get('request')
+        user_id = obj.id
+        link = reverse('blog:post-list', request=request) # only rest_framewok.reverse pass the request not django.urls.reverse
+        return f'{link}?user_id={user_id}' # if use django reverse should use request.build_absolute_uri method 
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'job_title', 'bio', 'phone', 'is_active', 'is_staff', 'is_superuser']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'job_title', 'bio', 'phone', 'posts', 'is_active', 'is_staff', 'is_superuser']
 
 
     def get_fields(self):
@@ -107,7 +137,7 @@ class UserSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
 
         if request and not request.user.is_staff:
-            allowed_fields = ['username', 'first_name', 'last_name', 'job_title', 'bio']
+            allowed_fields = ['username', 'first_name', 'last_name', 'job_title', 'bio', 'posts']
             if request.user == instance:
                 allowed_fields += ['id', 'email', 'phone']
             rep =  {k: v for k, v in rep.items() if k in allowed_fields}
