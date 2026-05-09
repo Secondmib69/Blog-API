@@ -47,8 +47,8 @@ class PostCommentSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     class Meta:
         model = Comment
-        fields = ['id', 'user', 'body', 'created', 'post', 'parent', 'is_active']
-        read_only_fields = ['user', 'parent', 'post']
+        fields = ['id', 'user', 'body', 'created', 'post', 'is_active']
+        read_only_fields = ['user', 'post']
 
     def get_user(self, obj):
         request = self.context.get('request')
@@ -80,7 +80,7 @@ class CommentApproveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'user', 'body', 'created', 'post', 'parent', 'is_active']
+        fields = ['id', 'user', 'body', 'created', 'post', 'is_active']
 
     def get_fields(self):
         fields = super().get_fields()

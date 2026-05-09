@@ -49,8 +49,7 @@ class Comment(models.Model):
     body = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=False)
-    parent = models.ForeignKey(
-        'self', on_delete=models.CASCADE, related_name='replies', blank=True, null=True)
+
 
     def __str__(self):
         return f'by {self.user.username} on post: {self.post.title}'
