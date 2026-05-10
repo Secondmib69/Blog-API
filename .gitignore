@@ -21,6 +21,7 @@ staticfiles/
 local_settings.py
 .env
 .env.*
+!.env.example
 
 # ======================
 # IDE and Editor files
