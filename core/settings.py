@@ -107,10 +107,10 @@ DATABASES = {
     # },
     'default': {
     'ENGINE': 'django.db.backends.postgresql',
-    'NAME': os.getenv('DB_NAME'),
-    'USER': os.getenv('DB_USER'),
-    'PASSWORD': os.getenv('DB_PASSWORD'),
-    'HOST': 'localhost',
+    'NAME': os.getenv('POSTGRES_DB'),
+    'USER': os.getenv('POSTGRES_USER'),
+    'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+    'HOST': os.getenv('DB_HOST', 'localhost'),
     'PORT': '5432'
     }
 }
@@ -143,7 +143,7 @@ AUTH_USER_MODEL = 'blog.User'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'asia/tehran'
+TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
 

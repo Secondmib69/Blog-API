@@ -1,0 +1,32 @@
+name: 'blog-api'
+
+services:
+  django-web:
+    build: .
+    image: 'django-blog'
+    container_name: 'django-blog-container'
+    ports:
+      - "8000:8000"
+    # command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - postgres
+    environment:
+      DJANGO_SETTINGS_MODULE: core.settings
+    volumes:
+      - .:/app
+
+  postgres:
+    image: postgres:18.3
+    container_name: postgres-db
+    ports:
+      - "5431:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/
+
+volumes:
+  postgres_data:
