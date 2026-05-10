@@ -12,6 +12,8 @@ services:
       - postgres
     environment:
       DJANGO_SETTINGS_MODULE: core.settings
+    env_file:
+      - .env
     volumes:
       - .:/app
 

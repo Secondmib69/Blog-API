@@ -68,12 +68,23 @@ cp .env.example .env
 Configure the values in `.env`:
 
 ```env
+DJANGO_SECRET_KEY=your_generated_secret_key
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 POSTGRES_DB=blog_db
 POSTGRES_USER=blog_user
 POSTGRES_PASSWORD=strong_password
 DB_HOST=localhost
 DJANGO_STORAGE=local
 ```
+
+Generate a Django secret key with:
+
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+Copy the generated value into `DJANGO_SECRET_KEY` in your `.env` file. Use `DJANGO_DEBUG=True` for local development and set it to `False` in production. Set `DJANGO_ALLOWED_HOSTS` to a comma-separated list of hostnames or IP addresses that can serve the app.
 
 For Docker Compose, use `DB_HOST=postgres` because the database service name is `postgres`.
 
@@ -107,7 +118,7 @@ On Windows:
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file and set `DB_HOST=localhost`.
+4. Create a `.env` file, generate `DJANGO_SECRET_KEY`, and set `DB_HOST=localhost`.
 
 5. Run migrations:
 
