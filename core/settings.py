@@ -156,6 +156,17 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+EMAIL_BACKEND = {
+    "console": "django.core.mail.backends.console.EmailBackend",
+    "smtp": "django.core.mail.backends.smtp.EmailBackend",
+}[os.getenv("EMAIL_BACKEND", "console")]
+
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = True
+
 
 SITE_ID = 1
 
@@ -202,10 +213,10 @@ if STORAGE_MODE == "s3":
         },
     }
 
-    AWS_S3_ENDPOINT_URL = os.getenv('ARVAN_ENDPOINT')
-    AWS_ACCESS_KEY_ID = os.getenv('ARVAN_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.getenv('ARVAN_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('ARVAN_STORAGE_BUCKET_NAME')
+    AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL')
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
     AWS_S3_FILE_OVERWRITE = False
     # AWS_DEFAULT_ACL = None
     AWS_S3_OBJECT_PARAMETERS = {
