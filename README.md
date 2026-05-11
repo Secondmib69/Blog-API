@@ -206,8 +206,6 @@ Authentication is provided by `dj-rest-auth` and registration is provided by `dj
 | GET | `/auth/user/` | Get current authenticated user |
 | PUT/PATCH | `/auth/user/` | Update current authenticated user |
 | POST | `/auth/registration/` | Register a new account |
-| POST | `/auth/registration/verify-email/` | Verify registration email, if enabled |
-| POST | `/auth/registration/resend-email/` | Resend verification email, if enabled |
 
 ## Blog Endpoints
 
