@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Post, Comment
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -15,7 +16,7 @@ class PostAdmin(admin.ModelAdmin):
     # readonly_fields = ['slug']
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(UserAdmin):
     list_display = ['id', 'username', 'email', 'is_staff']
     list_editable = ['is_staff']
     list_display_links = ['username']
